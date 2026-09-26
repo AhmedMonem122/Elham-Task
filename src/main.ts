@@ -1,8 +1,14 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module.js';
+import 'dotenv/config';
+import { createApp } from './bootstrap.js';
 
-async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  await app.listen(process.env.PORT ?? 3000);
+async function main() {
+  const { app } = await createApp();
+  const port = Number(process.env.PORT ?? 3000);
+  await app.listen(port);
+  // eslint-disable-next-line no-console
+  console.log(
+    `Booking API up on :${port} — docs at /docs, spec at /openapi.json`,
+  );
 }
-await bootstrap();
+
+void main();
