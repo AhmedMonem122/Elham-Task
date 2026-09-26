@@ -3,6 +3,10 @@
 /node_modules
 /build
 
+# Prisma generated client (regenerate with `npx prisma generate`)
+src/generated
+generated
+
 # TypeScript build cache
 *.tsbuildinfo
 
