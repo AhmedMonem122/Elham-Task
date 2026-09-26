@@ -65,8 +65,23 @@ export function configureApp(app: INestApplication): OpenAPIObject {
   });
 
   // Swagger UI at /docs…
+  //
+  // NOTE on serverless (Vercel): swagger-ui-express serves its JS/CSS from
+  // node_modules, which the function bundler does not always include, leaving
+  // a blank page (HTML loads, assets 404). Loading the UI shell from a pinned
+  // CDN avoids that entirely; the spec JSON itself is still served locally
+  // from /docs-json by this same server. Override via SWAGGER_UI_CDN if needed.
+  const swaggerCdn =
+    process.env.SWAGGER_UI_CDN ??
+    'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.33.0';
   SwaggerModule.setup('docs', app, document, {
     customSiteTitle: 'Booking API — Docs',
+    customCssUrl: `${swaggerCdn}/swagger-ui.css`,
+    customfavIcon: `${swaggerCdn}/favicon-32x32.png`,
+    customJs: [
+      `${swaggerCdn}/swagger-ui-bundle.js`,
+      `${swaggerCdn}/swagger-ui-standalone-preset.js`,
+    ],
     swaggerOptions: { persistAuthorization: false, tryItOutEnabled: true },
   });
 

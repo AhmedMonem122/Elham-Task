@@ -133,6 +133,10 @@ as a single function. Keep `src/main.ts` in that standard shape so detection kee
 - Set `DATABASE_URL` in **Vercel → Project → Settings → Environment Variables**.
 - Run `npx prisma migrate deploy && npm run db:seed` **once** against the Neon DB
   from your machine (migrations are not run by the hosting platform).
+- Swagger UI (`/docs`) loads its JS/CSS shell from a pinned CDN (`SWAGGER_UI_CDN`,
+  default jsdelivr `swagger-ui-dist@5.33.0`) because serverless bundlers skip those
+  static files — without this the page renders blank. The spec JSON itself is always
+  served locally by the API.
 - Socket.IO emits on Vercel are best-effort — realtime needs a long-running host
   (local, VPS, Render…); see §10.
 
