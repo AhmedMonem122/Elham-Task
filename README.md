@@ -123,12 +123,18 @@ curl -X POST localhost:3000/bookings -H "Content-Type: application/json" \
 
 ## 8. Deploy notes (Vercel + Neon)
 
-- `vercel.json` rewrites everything to `api/index.ts`, which boots the same Nest app
-  (`src/bootstrap.ts` is shared between `src/main.ts` and the serverless entry).
-- Set `DATABASE_URL` in Vercel env vars; run `npx prisma migrate deploy && npm run db:seed`
-  once against the Neon DB from your machine.
-- Swagger UI works on Vercel (`/docs`, `/openapi.json`). Socket.IO emits there are
-  best-effort — realtime needs a long-running host (local, VPS, Render…); see §10.
+Vercel supports NestJS with **zero configuration**: it auto-detects the canonical
+entrypoint `src/main.ts` (which imports `@nestjs/core` directly and calls
+`app.listen()`) and serves the whole app — REST routes, `/docs`, `/openapi.json` —
+as a single function. Keep `src/main.ts` in that standard shape so detection keeps working.
+
+- `vercel.json` only sets `buildCommand` (`prisma generate` + `nest build`); no custom
+  routing is needed. `postinstall` also regenerates the Prisma client on `npm install`.
+- Set `DATABASE_URL` in **Vercel → Project → Settings → Environment Variables**.
+- Run `npx prisma migrate deploy && npm run db:seed` **once** against the Neon DB
+  from your machine (migrations are not run by the hosting platform).
+- Socket.IO emits on Vercel are best-effort — realtime needs a long-running host
+  (local, VPS, Render…); see §10.
 
 ## 9. How double-booking is prevented (key decisions)
 

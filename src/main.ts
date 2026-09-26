@@ -1,8 +1,11 @@
 import 'dotenv/config';
-import { createApp } from './bootstrap.js';
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module.js';
+import { configureApp } from './bootstrap.js';
 
-async function main() {
-  const { app } = await createApp();
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  configureApp(app);
   const port = Number(process.env.PORT ?? 3000);
   await app.listen(port);
   // eslint-disable-next-line no-console
@@ -11,4 +14,4 @@ async function main() {
   );
 }
 
-void main();
+void bootstrap();

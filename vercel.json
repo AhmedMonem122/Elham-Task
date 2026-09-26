@@ -1,5 +1,4 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "npx prisma generate && npm run build",
-  "rewrites": [{ "source": "/(.*)", "destination": "/api" }]
+  "buildCommand": "npx prisma generate && npm run build"
 }

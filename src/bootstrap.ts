@@ -4,24 +4,20 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
+import {
+  DocumentBuilder,
+  OpenAPIObject,
+  SwaggerModule,
+} from '@nestjs/swagger';
 import { AppModule } from './app.module.js';
 import { GlobalExceptionFilter } from './common/errors/http-exception.filter.js';
 
 /**
- * Shared bootstrap used by `src/main.ts` (long-running server, Socket.IO
- * fully live) and `api/index.ts` (Vercel serverless, HTTP + Swagger live;
- *31 sockets need a long-running host — see README).
+ * Shared app configuration (pipes, filter, CORS, Swagger, /openapi.json).
+ * Used by `src/main.ts` (canonical NestJS entrypoint — also what Vercel's
+ * zero-config NestJS detection looks for) and by the e2e suite via createApp().
  */
-export async function createApp(): Promise<{
-  app: INestApplication;
-  document: OpenAPIObject;
-}> {
-  const app = await NestFactory.create(AppModule, {
-    // Keep raw JSON parse errors flowing to our filter as VALIDATION_ERROR.
-    bodyParser: true,
-  });
-
+export function configureApp(app: INestApplication): OpenAPIObject {
   app.useGlobalFilters(new GlobalExceptionFilter());
 
   app.useGlobalPipes(
@@ -78,6 +74,15 @@ export async function createApp(): Promise<{
   const adapter = app.getHttpAdapter();
   adapter.get('/openapi.json', (_req: unknown, res: any) => res.json(document));
 
+  return document;
+}
+
+export async function createApp(): Promise<{
+  app: INestApplication;
+  document: OpenAPIObject;
+}> {
+  const app = await NestFactory.create(AppModule, { bodyParser: true });
+  const document = configureApp(app);
   return { app, document };
 }
 
