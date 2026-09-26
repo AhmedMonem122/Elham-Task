@@ -1,4 +1,11 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "npx prisma generate && npm run build"
+  "buildCommand": "npx prisma generate && npm run build",
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "api/index.ts",
+      "methods": ["GET", "POST", "DELETE", "OPTIONS"]
+    }
+  ]
 }
