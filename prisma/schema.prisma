@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// Fixed, pre-seeded appointment slots.
+/// A slot is "available" when it has NO booking with status = 'active'.
+/// Availability is derived (no boolean column) so cancel/rebook
+/// can never desync it.
+model Slot {
+  id       String    @id @db.Uuid
+  startsAt DateTime  @map("starts_at") @db.Timestamptz(6)
+  endsAt   DateTime  @map("ends_at") @db.Timestamptz(6)
+  bookings Booking[]
+
+  @@map("slots")
+}
+
+/// Only two states per spec. Kept as a native Postgres enum so the
+/// partial unique index below can target 'active' precisely.
+enum BookingStatus {
+  active
+  cancelled
+
+  @@map("booking_status")
+}
+
+model Booking {
+  id            String        @id @db.Uuid
+  slotId        String        @map("slot_id") @db.Uuid
+  slot          Slot          @relation(fields: [slotId], references: [id], onDelete: Restrict)
+  customerName  String        @map("customer_name") @db.Text
+  customerEmail String        @map("customer_email") @db.Text
+  status        BookingStatus @default(active)
+  createdAt     DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  /// History is preserved: many cancelled bookings may reference the same
+  /// slot, but the DB-level partial unique index (see migration SQL)
+  /// guarantees AT MOST ONE 'active' booking per slot, even under races.
+  @@index([slotId])
+  @@index([status])
+  @@map("bookings")
+}
